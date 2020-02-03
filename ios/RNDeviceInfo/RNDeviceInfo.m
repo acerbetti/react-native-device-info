@@ -299,15 +299,18 @@ RCT_EXPORT_METHOD(getIpAddress:(RCTPromiseResolveBlock)resolve rejecter:(RCTProm
         temp_addr = interfaces;
         while(temp_addr != NULL) {
             if(temp_addr->ifa_addr->sa_family == AF_INET) {
-                // Check if interface is en0 which is the wifi connection on the iPhone
-                if([[NSString stringWithUTF8String:temp_addr->ifa_name] isEqualToString:@"en0"]) {
-                    // Get NSString from C String
-                    address = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
-
-                }
-
+                NSString* ifname = [NSString stringWithUTF8String:temp_addr->ifa_name];
+                    if(
+                        // Check if interface is en0 which is the wifi connection the iPhone
+                        // and the ethernet connection on the Apple TV
+                        [ifname isEqualToString:@"en0"] ||
+                        // Check if interface is en1 which is the wifi connection on the Apple TV
+                        [ifname isEqualToString:@"en1"]
+                    ) {
+                        // Get NSString from C String
+                        address = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
+                    }
             }
-
             temp_addr = temp_addr->ifa_next;
         }
     }
